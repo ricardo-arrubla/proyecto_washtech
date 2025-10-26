@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Admin - WashTech{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">MENÚ ADMIN</h6>
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-washing-machine me-2"></i>Lavadoras
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-calendar me-2"></i>Reservas
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users me-2"></i>Clientes
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-bar me-2"></i>Reportes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Header -->
+            <div class="bg-white rounded shadow-sm p-4 mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-user-shield text-danger me-2"></i>
+                    Panel de Administrador
+                </h2>
+                <p class="text-muted mb-0">Bienvenido, {{ user.name }}</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm bg-primary text-white">
+                        <div class="card-body">
+                            <h6 class="mb-1 opacity-75">Total Lavadoras</h6>
+                            <h2 class="mb-0 fw-bold">45</h2>
+                            <small><i class="fas fa-arrow-up me-1"></i>+5 este mes</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm bg-success text-white">
+                        <div class="card-body">
+                            <h6 class="mb-1 opacity-75">Reservas Hoy</h6>
+                            <h2 class="mb-0 fw-bold">18</h2>
+                            <small><i class="fas fa-clock me-1"></i>6 pendientes</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm bg-warning text-white">
+                        <div class="card-body">
+                            <h6 class="mb-1 opacity-75">Clientes Activos</h6>
+                            <h2 class="mb-0 fw-bold">234</h2>
+                            <small><i class="fas fa-users me-1"></i>+12 esta semana</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card border-0 shadow-sm bg-info text-white">
+                        <div class="card-body">
+                            <h6 class="mb-1 opacity-75">Ingresos Mes</h6>
+                            <h2 class="mb-0 fw-bold">$2.5M</h2>
+                            <small><i class="fas fa-chart-line me-1"></i>+15%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-md-8 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Reservas Mensuales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="reservationsChart" height="80"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>Estado Lavadoras
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Operativas</span>
+                                    <span class="fw-bold">38</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" style="width: 84%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Mantenimiento</span>
+                                    <span class="fw-bold">5</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-warning" style="width: 11%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Inactivas</span>
+                                    <span class="fw-bold">2</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" style="width: 5%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-7 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>Actividad Reciente
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                            <i class="fas fa-check text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Nueva reserva confirmada</strong>
+                                            <br><small class="text-muted">Cliente: María González - Hace 5 min</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                            <i class="fas fa-plus text-info"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Lavadora agregada al inventario</strong>
+                                            <br><small class="text-muted">Samsung WF-15 - Hace 1 hora</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                                            <i class="fas fa-wrench text-warning"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Mantenimiento programado</strong>
+                                            <br><small class="text-muted">LG TurboWash - Hace 3 horas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Alertas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning mb-2">
+                                <i class="fas fa-tools me-2"></i>
+                                <strong>5 lavadoras</strong> requieren mantenimiento
+                            </div>
+                            <div class="alert alert-info mb-2">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <strong>8 reservas</strong> pendientes de confirmación
+                            </div>
+                            <div class="alert alert-danger mb-0">
+                                <i class="fas fa-times-circle me-2"></i>
+                                <strong>2 lavadoras</strong> fuera de servicio
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gráfico de reservas
+    const ctx = document.getElementById('reservationsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct'],
+            datasets: [{
+                label: 'Reservas',
+                data: [45, 52, 48, 65, 70, 68, 75, 80, 78, 85],
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

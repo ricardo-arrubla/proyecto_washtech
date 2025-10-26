@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center min-vh-75">
+        <div class="col-lg-6 text-white">
+            <h1 class="display-3 fw-bold mb-4">
+                Alquila tu Lavadora <br>
+                <span class="text-warning">Fácil y Rápido</span>
+            </h1>
+            <p class="lead mb-4">
+                Accede a lavadoras de calidad sin necesidad de comprar. 
+                Reserva en línea y recibe el servicio en tu hogar.
+            </p>
+            <div class="d-flex gap-3">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-lg px-4">
+                    <i class="fas fa-rocket me-2"></i>Comenzar Ahora
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6 text-center">
+            <i class="fas fa-washing-machine text-white" style="font-size: 15rem; opacity: 0.2;"></i>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mt-5 g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-lg border-0">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-calendar-check fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Reserva en Línea</h5>
+                    <p class="card-text text-muted">
+                        Consulta disponibilidad y reserva tu lavadora en tiempo real desde cualquier dispositivo.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-lg border-0">
+                <div class="card-body text-center p-4">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-home fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Servicio a Domicilio</h5>
+                    <p class="card-text text-muted">
+                        Recibe la lavadora en la comodidad de tu hogar sin preocuparte por el transporte.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-lg border-0">
+                <div class="card-body text-center p-4">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-dollar-sign fa-2x"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Precios Accesibles</h5>
+                    <p class="card-text text-muted">
+                        Paga solo por el tiempo que necesitas, sin la carga financiera de una compra.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row mt-5 py-5 text-white text-center">
+        <div class="col-md-4 mb-4">
+            <div class="display-4 fw-bold">50+</div>
+            <p class="lead">Lavadoras Disponibles</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="display-4 fw-bold">200+</div>
+            <p class="lead">Clientes Satisfechos</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="display-4 fw-bold">24/7</div>
+            <p class="lead">Soporte en Línea</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

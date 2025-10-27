@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Reserva - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <a href="{{ url_for('catalog.index') }}" class="btn btn-sm btn-outline-secondary mb-3">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Catálogo
+                </a>
+                <h2 class="mb-0">
+                    <i class="fas fa-calendar-plus text-success me-2"></i>
+                    Nueva Reserva
+                </h2>
+                <p class="text-muted">Complete los datos para reservar una lavadora</p>
+            </div>
+
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('reservation.create') }}">
+                        <!-- Selección de Lavadora -->
+                        <div class="mb-4">
+                            <label for="machine_id" class="form-label">
+                                <i class="fas fa-washing-machine me-2"></i>
+                                Lavadora <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" id="machine_id" name="machine_id" required>
+                                <option value="">Selecciona una lavadora</option>
+                                {% for machine in machines %}
+                                <option value="{{ machine.id }}" 
+                                        {% if selected_machine and selected_machine.id == machine.id %}selected{% endif %}>
+                                    {{ machine.model }} - {{ machine.capacity }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Fecha de Reserva -->
+                        <div class="mb-4">
+                            <label for="reservation_date" class="form-label">
+                                <i class="fas fa-calendar me-2"></i>
+                                Fecha de Reserva <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" class="form-control form-control-lg" 
+                                   id="reservation_date" name="reservation_date" 
+                                   value="{{ selected_date }}" required>
+                            <small class="text-muted">Selecciona la fecha en que necesitas la lavadora</small>
+                        </div>
+
+                        <!-- Horario -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="start_time" class="form-label">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Hora de Inicio <span class="text-danger">*</span>
+                                </label>
+                                <input type="time" class="form-control form-control-lg" 
+                                       id="start_time" name="start_time" value="08:00" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="end_time" class="form-label">
+                                    <i class="fas fa-clock me-2"></i>
+                                    Hora de Fin <span class="text-danger">*</span>
+                                </label>
+                                <input type="time" class="form-control form-control-lg" 
+                                       id="end_time" name="end_time" value="18:00" required>
+                            </div>
+                        </div>
+
+                        <!-- Información de Precio -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Precio estimado:</strong> $50,000 COP por día
+                        </div>
+
+                        <!-- Resumen -->
+                        {% if selected_machine %}
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h6 class="mb-3">Resumen de Reserva</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Lavadora:</strong><br>
+                                        {{ selected_machine.model }}
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Capacidad:</strong><br>
+                                        {{ selected_machine.capacity }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Botones -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Confirmar Reserva
+                            </button>
+                            <a href="{{ url_for('catalog.index') }}" class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Establecer fecha mínima como hoy
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('reservation_date').min = today;
+    
+    // Si no hay fecha, poner la de hoy
+    if (!document.getElementById('reservation_date').value) {
+        document.getElementById('reservation_date').value = today;
+    }
+</script>
+{% endblock %}

@@ -22,10 +22,10 @@ def seed_database():
         # Crear usuarios
         print("\n👤 Creando usuarios...")
         
-        # SuperAdmin
+        # SuperAdmin (nombre cambiado a Ricardo)
         if not User.query.filter_by(email='super@washtech.com').first():
             superadmin = User(
-                name='Super Administrador',
+                name='Ricardo',
                 email='super@washtech.com',
                 phone='3001234567',
                 address='Calle Principal 100, Tuluá',
@@ -33,12 +33,12 @@ def seed_database():
             )
             superadmin.set_password('super123')
             db.session.add(superadmin)
-            print("✅ SuperAdmin creado")
+            print("✅ SuperAdmin (Ricardo) creado")
         
-        # Admin
+        # Admin (nombre cambiado a Camilo)
         if not User.query.filter_by(email='admin@washtech.com').first():
             admin = User(
-                name='Carlos Administrador',
+                name='Camilo',
                 email='admin@washtech.com',
                 phone='3009876543',
                 address='Avenida 5 #20-30, Tuluá',
@@ -46,7 +46,7 @@ def seed_database():
             )
             admin.set_password('admin123')
             db.session.add(admin)
-            print("✅ Admin creado")
+            print("✅ Admin (Camilo) creado")
         
         # Clientes
         clientes_data = [
@@ -78,7 +78,8 @@ def seed_database():
                 'model': 'Samsung WF-15K',
                 'capacity': '15 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=500',
+                # imagen representativa de lavadora (frontal)
+                'image': '/static/images/lavadora samsung 7.5kg.webp',
                 'description': 'Lavadora de carga frontal con tecnología EcoBubble y tambor de diamante',
                 'location': 'Bodega A - Zona 1',
                 'date': date(2024, 1, 15)
@@ -87,7 +88,7 @@ def seed_database():
                 'model': 'LG TurboWash 360',
                 'capacity': '20 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=500',
+                'image': '/static/images/lavadora LG 22 kg.webp',
                 'description': 'Lavadora inteligente con AI DD y sistema TurboWash de alta eficiencia',
                 'location': 'Bodega A - Zona 2',
                 'date': date(2024, 2, 20)
@@ -96,7 +97,7 @@ def seed_database():
                 'model': 'Whirlpool Supreme Care',
                 'capacity': '12 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=500',
+                'image': '/static/images/lavadora Roper.webp',
                 'description': 'Lavadora con 6th Sense Technology y programa de vapor',
                 'location': 'Bodega B - Zona 1',
                 'date': date(2024, 3, 10)
@@ -105,7 +106,7 @@ def seed_database():
                 'model': 'Mabe Aqua Saver',
                 'capacity': '10 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1517677129300-07b130802f46?w=500',
+                'image': '/static/images/lavadora analoga 22 kg.webp',
                 'description': 'Lavadora con sistema de ahorro de agua y energía',
                 'location': 'Bodega B - Zona 2',
                 'date': date(2024, 3, 25)
@@ -114,7 +115,7 @@ def seed_database():
                 'model': 'Electrolux PerfectCare',
                 'capacity': '18 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500',
+                'image': '/static/images/lavadora Electrolux 16 kg.webp',
                 'description': 'Lavadora industrial con múltiples programas de lavado',
                 'location': 'Bodega C - Zona 1',
                 'date': date(2024, 4, 5)
@@ -123,7 +124,7 @@ def seed_database():
                 'model': 'Haceb Clean Pro',
                 'capacity': '14 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=500',
+                'image': '/static/images/lavadora Hceb 18 kg.webp',
                 'description': 'Lavadora colombiana con sistema de lavado suave',
                 'location': 'Bodega C - Zona 2',
                 'date': date(2024, 4, 20)
@@ -132,7 +133,7 @@ def seed_database():
                 'model': 'Bosch Serie 8',
                 'capacity': '16 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1604335398980-ededcadcc37d?w=500',
+                'image': '/static/images/lavadora Direct motion 18 kg.webp',
                 'description': 'Lavadora alemana de alta gama con Home Connect',
                 'location': 'Bodega A - Zona 3',
                 'date': date(2024, 5, 1)
@@ -141,7 +142,7 @@ def seed_database():
                 'model': 'Samsung AddWash',
                 'capacity': '13 kg',
                 'status': 'mantenimiento',
-                'image': 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=500',
+                'image': '/static/images/washer4.jpg',
                 'description': 'Lavadora con puerta adicional para agregar ropa durante el ciclo',
                 'location': 'Taller de Mantenimiento',
                 'date': date(2024, 5, 15)
@@ -150,7 +151,7 @@ def seed_database():
                 'model': 'LG Twin Wash',
                 'capacity': '22 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1626806819282-2c1dc01a5e0c?w=500',
+                'image': '/static/images/washer5.jpg',
                 'description': 'Sistema de doble lavadora para mayor productividad',
                 'location': 'Bodega D - Zona 1',
                 'date': date(2024, 6, 1)
@@ -159,7 +160,7 @@ def seed_database():
                 'model': 'General Electric Turbo',
                 'capacity': '11 kg',
                 'status': 'operativa',
-                'image': 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=500',
+                'image': '/static/images/washer7.jpg',
                 'description': 'Lavadora con sistema turbo de alta velocidad',
                 'location': 'Bodega D - Zona 2',
                 'date': date(2024, 6, 15)

@@ -34,6 +34,25 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('catalog.index') }}">
+                            <i class="fas fa-washing-machine me-1"></i>Catálogo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('catalog.check_availability') }}">
+                            <i class="fas fa-calendar-check me-1"></i>Disponibilidad
+                        </a>
+                    </li>
+                    {% if current_user.is_authenticated and current_user.role in ['admin', 'superadmin'] %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.list_washing_machines') }}">
+                            <i class="fas fa-cog me-1"></i>Administrar
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
@@ -41,15 +60,16 @@
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <span class="nav-link">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>{{ current_user.name }}
-                            </span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">
-                                <i class="fas fa-sign-out-alt me-1"></i>Salir
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i>Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-list me-2"></i>Mis Reservas</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
@@ -58,7 +78,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.register') }}">
+                            <a class="nav-link btn btn-warning text-dark ms-2" href="{{ url_for('auth.register') }}">
                                 <i class="fas fa-user-plus me-1"></i>Registrarse
                             </a>
                         </li>

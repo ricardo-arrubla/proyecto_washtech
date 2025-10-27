@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Lavadoras - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-washing-machine text-primary me-3"></i>
+            Catálogo de Lavadoras
+        </h1>
+        <p class="lead text-muted">Explora nuestra selección de lavadoras disponibles</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('catalog.index') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">
+                            <i class="fas fa-search me-1"></i>Buscar
+                        </label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search }}" placeholder="Modelo, marca...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="capacity" class="form-label">
+                            <i class="fas fa-weight me-1"></i>Capacidad
+                        </label>
+                        <select class="form-select" id="capacity" name="capacity">
+                            <option value="">Todas</option>
+                            <option value="7" {% if capacity == '7' %}selected{% endif %}>7 kg</option>
+                            <option value="10" {% if capacity == '10' %}selected{% endif %}>10 kg</option>
+                            <option value="15" {% if capacity == '15' %}selected{% endif %}>15 kg</option>
+                            <option value="20" {% if capacity == '20' %}selected{% endif %}>20 kg</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">
+                            <i class="fas fa-check-circle me-1"></i>Estado
+                        </label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Todos</option>
+                            <option value="operativa" {% if status == 'operativa' %}selected{% endif %}>Operativa</option>
+                            <option value="mantenimiento" {% if status == 'mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i>Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="mb-3">
+        <p class="text-muted">
+            <i class="fas fa-list me-2"></i>
+            Mostrando <strong>{{ machines|length }}</strong> lavadora(s)
+        </p>
+    </div>
+
+    <!-- Grid de Lavadoras -->
+    <div class="row g-4">
+        {% if machines %}
+            {% for machine in machines %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <!-- Imagen -->
+                    <div class="position-relative">
+                        {% if machine.image_url %}
+                            <img src="{{ machine.image_url }}" class="card-img-top" alt="{{ machine.model }}" 
+                                 style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 250px;">
+                                <i class="fas fa-washing-machine fa-5x text-secondary"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Badge de estado -->
+                        <div class="position-absolute top-0 end-0 m-3">
+                            {% if machine.operational_status == 'operativa' %}
+                                <span class="badge bg-success">Disponible</span>
+                            {% elif machine.operational_status == 'mantenimiento' %}
+                                <span class="badge bg-warning">Mantenimiento</span>
+                            {% else %}
+                                <span class="badge bg-danger">No disponible</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title mb-2">{{ machine.model }}</h5>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-weight-hanging me-2"></i>
+                            <strong>Capacidad:</strong> {{ machine.capacity }}
+                        </p>
+                        
+                        {% if machine.description %}
+                        <p class="card-text text-muted small">
+                            {{ machine.description[:100] }}{% if machine.description|length > 100 %}...{% endif %}
+                        </p>
+                        {% endif %}
+
+                        <div class="d-flex gap-2 mt-3">
+                            <a href="{{ url_for('catalog.detail', id=machine.id) }}" 
+                               class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                            </a>
+                            {% if current_user.is_authenticated and machine.operational_status == 'operativa' %}
+                            <a href="{{ url_for('reservation.create', machine_id=machine.id) }}" 
+                               class="btn btn-success">
+                                <i class="fas fa-calendar-plus"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Footer con info adicional -->
+                    <div class="card-footer bg-light border-0">
+                        <small class="text-muted">
+                            {% if machine.inventory %}
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ machine.inventory.location }}
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-5x text-muted mb-4"></i>
+                    <h3 class="text-muted">No se encontraron lavadoras</h3>
+                    <p class="text-muted mb-4">Intenta ajustar los filtros de búsqueda</p>
+                    <a href="{{ url_for('catalog.index') }}" class="btn btn-primary">
+                        <i class="fas fa-redo me-2"></i>Limpiar Filtros
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- CTA Section -->
+    {% if not current_user.is_authenticated %}
+    <div class="text-center mt-5 p-5 bg-light rounded">
+        <h3 class="mb-3">¿Listo para alquilar?</h3>
+        <p class="text-muted mb-4">Regístrate para hacer reservas y gestionar tus alquileres</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Registrarse
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_css %}
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}
+{% endblock %}

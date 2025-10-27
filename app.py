@@ -17,6 +17,8 @@ def create_app():
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Por favor inicia sesión para acceder a esta página.'
+    login_manager.login_message_category = 'info'
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -26,10 +28,14 @@ def create_app():
     from controllers.auth_controller import auth_bp
     from controllers.dashboard_controller import dashboard_bp
     from controllers.reservation_controller import reservation_bp
+    from controllers.admin_controller import admin_bp
+    from controllers.catalog_controller import catalog_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(reservation_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(catalog_bp)
     
     # Ruta principal
     @app.route('/')

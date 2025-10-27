@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Lavadora - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <a href="{{ url_for('admin.list_washing_machines') }}" class="btn btn-sm btn-outline-secondary mb-3">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+                <h2 class="mb-0">
+                    <i class="fas fa-edit text-warning me-2"></i>
+                    Editar Lavadora: {{ machine.model }}
+                </h2>
+                <p class="text-muted">ID: #{{ machine.id }}</p>
+            </div>
+
+            <!-- Form -->
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('admin.edit_washing_machine', id=machine.id) }}">
+                        <!-- Información Básica -->
+                        <h5 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Información Básica
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="model" class="form-label">
+                                    Modelo <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="model" name="model" 
+                                       value="{{ machine.model }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="capacity" class="form-label">
+                                    Capacidad <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="capacity" name="capacity" 
+                                       value="{{ machine.capacity }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="operational_status" class="form-label">
+                                    Estado Operativo <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="operational_status" name="operational_status" required>
+                                    <option value="operativa" {% if machine.operational_status == 'operativa' %}selected{% endif %}>
+                                        Operativa
+                                    </option>
+                                    <option value="mantenimiento" {% if machine.operational_status == 'mantenimiento' %}selected{% endif %}>
+                                        Mantenimiento
+                                    </option>
+                                    <option value="inactiva" {% if machine.operational_status == 'inactiva' %}selected{% endif %}>
+                                        Inactiva
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="acquisition_date" class="form-label">
+                                    Fecha de Adquisición
+                                </label>
+                                <input type="date" class="form-control" id="acquisition_date" name="acquisition_date" 
+                                       value="{{ machine.acquisition_date }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image_url" class="form-label">
+                                URL de Imagen
+                            </label>
+                            <input type="url" class="form-control" id="image_url" name="image_url" 
+                                   value="{{ machine.image_url or '' }}">
+                            {% if machine.image_url %}
+                            <div class="mt-2">
+                                <img src="{{ machine.image_url }}" alt="{{ machine.model }}" 
+                                     class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">
+                                Descripción
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ machine.description or '' }}</textarea>
+                        </div>
+
+                        <!-- Información de Inventario -->
+                        <h5 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-warehouse me-2"></i>Inventario y Ubicación
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="location" class="form-label">
+                                    Ubicación <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       value="{{ machine.inventory.location if machine.inventory else '' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="availability" class="form-label">
+                                    Disponibilidad
+                                </label>
+                                <select class="form-select" id="availability" name="availability">
+                                    <option value="true" {% if machine.inventory and machine.inventory.availability %}selected{% endif %}>
+                                        Disponible
+                                    </option>
+                                    <option value="false" {% if machine.inventory and not machine.inventory.availability %}selected{% endif %}>
+                                        No disponible
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Última actualización:</strong> 
+                            {{ machine.inventory.last_updated.strftime('%d/%m/%Y %H:%M') if machine.inventory else 'N/A' }}
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                <i class="fas fa-trash me-2"></i>Eliminar
+                            </button>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('admin.list_washing_machines') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-2"></i>Actualizar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la lavadora <strong>{{ machine.model }}</strong>?</p>
+                <p class="text-danger mb-0">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('admin.delete_washing_machine', id=machine.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function confirmDelete() {
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    // Previsualización de imagen al cambiar
+    document.getElementById('image_url').addEventListener('input', function() {
+        const url = this.value;
+        if (url) {
+            const preview = this.nextElementSibling;
+            if (preview && preview.querySelector('img')) {
+                preview.querySelector('img').src = url;
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

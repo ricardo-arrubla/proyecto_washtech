@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva Lavadora - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <a href="{{ url_for('admin.list_washing_machines') }}" class="btn btn-sm btn-outline-secondary mb-3">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+                <h2 class="mb-0">
+                    <i class="fas fa-plus-circle text-success me-2"></i>
+                    Agregar Nueva Lavadora
+                </h2>
+                <p class="text-muted">Complete el formulario para registrar una nueva lavadora</p>
+            </div>
+
+            <!-- Form -->
+            <div class="card border-0 shadow">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('admin.create_washing_machine') }}">
+                        <!-- Información Básica -->
+                        <h5 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Información Básica
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="model" class="form-label">
+                                    Modelo <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="model" name="model" 
+                                       placeholder="Ej: Samsung WF-15" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="capacity" class="form-label">
+                                    Capacidad <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="capacity" name="capacity" 
+                                       placeholder="Ej: 15 kg" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="operational_status" class="form-label">
+                                    Estado Operativo <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="operational_status" name="operational_status" required>
+                                    <option value="operativa" selected>Operativa</option>
+                                    <option value="mantenimiento">Mantenimiento</option>
+                                    <option value="inactiva">Inactiva</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="acquisition_date" class="form-label">
+                                    Fecha de Adquisición
+                                </label>
+                                <input type="date" class="form-control" id="acquisition_date" name="acquisition_date">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image_url" class="form-label">
+                                URL de Imagen
+                            </label>
+                            <input type="url" class="form-control" id="image_url" name="image_url" 
+                                   placeholder="https://ejemplo.com/imagen.jpg">
+                            <small class="text-muted">Ingrese la URL de una imagen de la lavadora</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">
+                                Descripción
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Descripción detallada de la lavadora, características especiales, etc."></textarea>
+                        </div>
+
+                        <!-- Información de Inventario -->
+                        <h5 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-warehouse me-2"></i>Inventario y Ubicación
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label">
+                                Ubicación <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   placeholder="Ej: Bodega A - Pasillo 3" required>
+                            <small class="text-muted">Ubicación física de la lavadora</small>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{{ url_for('admin.list_washing_machines') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Guardar Lavadora
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Previsualización de imagen -->
+            <div class="card border-0 shadow mt-3" id="imagePreview" style="display: none;">
+                <div class="card-body">
+                    <h6 class="mb-3">Previsualización de Imagen</h6>
+                    <img id="previewImg" src="" alt="Preview" class="img-fluid rounded" style="max-height: 300px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Previsualización de imagen
+    document.getElementById('image_url').addEventListener('input', function() {
+        const url = this.value;
+        const preview = document.getElementById('imagePreview');
+        const img = document.getElementById('previewImg');
+        
+        if (url) {
+            img.src = url;
+            preview.style.display = 'block';
+            
+            img.onerror = function() {
+                preview.style.display = 'none';
+            };
+        } else {
+            preview.style.display = 'none';
+        }
+    });
+
+    // Validación de formulario
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('form')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}
+{% endblock %}

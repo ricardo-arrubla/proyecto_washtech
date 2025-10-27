@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Lavadoras - WashTech{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Header -->
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="fas fa-washing-machine text-primary me-2"></i>
+                        Gestión de Lavadoras
+                    </h2>
+                    <p class="text-muted mb-0">Administración del inventario de lavadoras</p>
+                </div>
+                <a href="{{ url_for('admin.create_washing_machine') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nueva Lavadora
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total</h6>
+                            <h3 class="fw-bold mb-0">{{ machines|length }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-washing-machine text-primary fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Operativas</h6>
+                            <h3 class="fw-bold mb-0">
+                                {{ machines|selectattr('operational_status', 'equalto', 'operativa')|list|length }}
+                            </h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Mantenimiento</h6>
+                            <h3 class="fw-bold mb-0">
+                                {{ machines|selectattr('operational_status', 'equalto', 'mantenimiento')|list|length }}
+                            </h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-wrench text-warning fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Inactivas</h6>
+                            <h3 class="fw-bold mb-0">
+                                {{ machines|selectattr('operational_status', 'equalto', 'inactiva')|list|length }}
+                            </h3>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-times-circle text-danger fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">Lista de Lavadoras</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Buscar lavadora...">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="machinesTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Imagen</th>
+                                    <th>Modelo</th>
+                                    <th>Capacidad</th>
+                                    <th>Estado</th>
+                                    <th>Ubicación</th>
+                                    <th>Disponible</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if machines %}
+                                    {% for machine in machines %}
+                                    <tr>
+                                        <td>#{{ machine.id }}</td>
+                                        <td>
+                                            {% if machine.image_url %}
+                                                <img src="{{ machine.image_url }}" alt="{{ machine.model }}" 
+                                                     class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-secondary bg-opacity-10 rounded d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-washing-machine text-secondary"></i>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td><strong>{{ machine.model }}</strong></td>
+                                        <td>{{ machine.capacity }}</td>
+                                        <td>
+                                            {% if machine.operational_status == 'operativa' %}
+                                                <span class="badge bg-success">Operativa</span>
+                                            {% elif machine.operational_status == 'mantenimiento' %}
+                                                <span class="badge bg-warning">Mantenimiento</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactiva</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if machine.inventory %}
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ machine.inventory.location or 'Sin ubicación' }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if machine.inventory and machine.inventory.availability %}
+                                                <span class="badge bg-success">Sí</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('admin.view_washing_machine', id=machine.id) }}" 
+                                                   class="btn btn-info" title="Ver">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ url_for('admin.edit_washing_machine', id=machine.id) }}" 
+                                                   class="btn btn-warning" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-danger" 
+                                                        onclick="confirmDelete({{ machine.id }}, '{{ machine.model }}')" 
+                                                        title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5">
+                                            <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                            <p class="text-muted">No hay lavadoras registradas</p>
+                                            <a href="{{ url_for('admin.create_washing_machine') }}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Agregar Primera Lavadora
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la lavadora <strong id="machineName"></strong>?</p>
+                <p class="text-muted mb-0">Esta acción desactivará la lavadora del sistema.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Búsqueda en tabla
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#machinesTable tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    
+    // Confirmación de eliminación
+    function confirmDelete(id, name) {
+        document.getElementById('machineName').textContent = name;
+        document.getElementById('deleteForm').action = `/admin/lavadoras/${id}/eliminar`;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+</script>
+{% endblock %}
+{% endblock %}

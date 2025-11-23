@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Lavadora - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{{ url_for('admin.list_washing_machines') }}" class="btn btn-sm btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+
+            <div class="card border-0 shadow">
+                <div class="card-body">
+                    <h3 class="mb-2">{{ machine.model }}</h3>
+                    <p class="text-muted">ID: #{{ machine.id }}</p>
+
+                    <div class="row">
+                        <div class="col-md-5">
+                            <img src="{{ machine.image_url or '/static/images/icono de lavadora.jpg' }}" alt="{{ machine.model }}" class="img-fluid rounded mb-3">
+                        </div>
+                        <div class="col-md-7">
+                            <ul class="list-unstyled">
+                                <li><strong>Capacidad:</strong> {{ machine.capacity }}</li>
+                                <li><strong>Estado:</strong> {{ machine.operational_status }}</li>
+                                <li><strong>Fecha de adquisición:</strong> {{ machine.acquisition_date or 'N/A' }}</li>
+                                <li><strong>Ubicación:</strong> {{ machine.inventory.location if machine.inventory else 'N/A' }}</li>
+                                <li><strong>Disponibilidad:</strong> {% if machine.inventory and machine.inventory.availability %}Disponible{% else %}No disponible{% endif %}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if machine.description %}
+                    <hr>
+                    <h6>Descripción</h6>
+                    <p>{{ machine.description }}</p>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a href="{{ url_for('admin.edit_washing_machine', id=machine.id) }}" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>Editar
+                        </a>
+                        <form action="{{ url_for('admin.delete_washing_machine', id=machine.id) }}" method="POST" onsubmit="return confirm('¿Eliminar esta lavadora?')">
+                            <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

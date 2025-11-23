@@ -8,7 +8,8 @@ class WashingMachine(db.Model):
     capacity = db.Column(db.String(50), nullable=False)  # ej: "7 kg"
     operational_status = db.Column(db.String(20), default='operativa')  # operativa, mantenimiento, inactiva
     acquisition_date = db.Column(db.Date)
-    image_url = db.Column(db.String(200))
+    # Por defecto usar un icono genérico si no se especifica imagen
+    image_url = db.Column(db.String(200), default='/static/images/icono de lavadora.jpg')
     description = db.Column(db.Text)
     is_active = db.Column(db.Boolean, default=True)
     

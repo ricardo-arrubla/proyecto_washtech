@@ -21,7 +21,7 @@
             <!-- Form -->
             <div class="card border-0 shadow">
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('admin.edit_washing_machine', id=machine.id) }}">
+                    <form method="POST" action="{{ url_for('admin.edit_washing_machine', id=machine.id) }}" enctype="multipart/form-data">
                         <!-- Información Básica -->
                         <h5 class="border-bottom pb-2 mb-3">
                             <i class="fas fa-info-circle me-2"></i>Información Básica
@@ -71,17 +71,20 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="image_url" class="form-label">
-                                URL de Imagen
+                            <label for="image_file" class="form-label">
+                                Imagen (subir archivo) / Usar icono por defecto
                             </label>
-                            <input type="url" class="form-control" id="image_url" name="image_url" 
-                                   value="{{ machine.image_url or '' }}">
-                            {% if machine.image_url %}
+                            <input type="file" class="form-control" id="image_file" name="image_file" accept="image/*">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" value="on" id="use_default" name="use_default">
+                                <label class="form-check-label" for="use_default">
+                                    Usar icono de lavadora por defecto
+                                </label>
+                            </div>
                             <div class="mt-2">
-                                <img src="{{ machine.image_url }}" alt="{{ machine.model }}" 
+                                <img id="image_preview" src="{{ machine.image_url or '/static/images/icono de lavadora.jpg' }}" alt="{{ machine.model }}" 
                                      class="img-thumbnail" style="max-height: 150px;">
                             </div>
-                            {% endif %}
                         </div>
 
                         <div class="mb-4">
@@ -177,16 +180,56 @@
         new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
 
-    // Previsualización de imagen al cambiar
-    document.getElementById('image_url').addEventListener('input', function() {
-        const url = this.value;
-        if (url) {
-            const preview = this.nextElementSibling;
-            if (preview && preview.querySelector('img')) {
-                preview.querySelector('img').src = url;
+    // Previsualización de imagen al seleccionar archivo y manejar opción de icono por defecto
+    const fileInput = document.getElementById('image_file');
+    const previewImg = document.getElementById('image_preview');
+    const useDefault = document.getElementById('use_default');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                previewImg.src = ev.target.result;
             }
+            reader.readAsDataURL(file);
+            // Uncheck "usar por defecto" si se seleccionó archivo
+            useDefault.checked = false;
         }
     });
+
+    useDefault.addEventListener('change', function(e) {
+        if (this.checked) {
+            previewImg.src = '/static/images/icono de lavadora.jpg';
+            // limpiar selección de archivo
+            fileInput.value = '';
+        }
+    });
+
+    // Deshabilitar/ocultar selector de disponibilidad cuando el estado no sea 'operativa'
+    const statusSelect = document.getElementById('operational_status');
+    const availabilitySelect = document.getElementById('availability');
+    const availabilityContainer = availabilitySelect ? availabilitySelect.closest('.col-md-4') : null;
+
+    function updateAvailabilityVisibility() {
+        const val = statusSelect.value;
+        if (val === 'operativa') {
+            if (availabilitySelect) availabilitySelect.disabled = false;
+            if (availabilityContainer) availabilityContainer.style.opacity = '1';
+        } else {
+            // forzar no disponible visualmente y deshabilitar control
+            if (availabilitySelect) {
+                availabilitySelect.value = 'false';
+                availabilitySelect.disabled = true;
+            }
+            if (availabilityContainer) availabilityContainer.style.opacity = '0.6';
+        }
+    }
+
+    // Inicial
+    updateAvailabilityVisibility();
+    // Escuchar cambios
+    statusSelect.addEventListener('change', updateAvailabilityVisibility);
 </script>
 {% endblock %}
 {% endblock %}

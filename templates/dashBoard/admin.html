@@ -20,6 +20,9 @@
                         <a href="{{ url_for('reservation.index') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-calendar me-2"></i>Reservas
                         </a>
+                        <a href="{{ url_for('admin.pending_reservations') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-hourglass-end me-2"></i>Pendientes
+                        </a>
                         <a href="{{ url_for('admin.list_users') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-users me-2"></i>Clientes
                         </a>
@@ -76,32 +79,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card border-0 shadow-sm bg-info text-white">
-                        <div class="card-body">
-                            <h6 class="mb-1 opacity-75">Ingresos Mes</h6>
-                            <h2 class="mb-0 fw-bold">$2.5M</h2>
-                            <small><i class="fas fa-chart-line me-1"></i>+15%</small>
-                        </div>
-                    </div>
-                </div>
+                <!-- Ingresos Mes card removed as requested -->
             </div>
 
-            <!-- Charts Row -->
+            <!-- Charts Row: Reservations chart removed per request. Keeping Estado Lavadoras card full-width -->
             <div class="row mb-4">
-                <div class="col-md-8 mb-3">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chart-line me-2"></i>Reservas Mensuales
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="reservationsChart" height="80"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-12 mb-3">
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-white">
                             <h5 class="mb-0">
@@ -217,34 +200,6 @@
     </div>
 </div>
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Gráfico de reservas
-    const ctx = document.getElementById('reservationsChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct'],
-            datasets: [{
-                label: 'Reservas',
-                data: [45, 52, 48, 65, 70, 68, 75, 80, 78, 85],
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
-</script>
-{% endblock %}
+{# Chart removed; no extra JS needed for this page #}
 
 {% endblock %}

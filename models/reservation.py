@@ -10,7 +10,8 @@ class Reservation(db.Model):
     reservation_date = db.Column(db.Date, nullable=False)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
-    status = db.Column(db.String(20), default='pendiente')  # pendiente, confirmada, cancelada, completada
+    status = db.Column(db.String(20), default='pendiente')  # pendiente, confirmada, cancelada, completada, entregado
+    assigned_operator_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Operador asignado
     total_payment = db.Column(db.Float, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

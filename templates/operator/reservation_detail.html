@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Reserva - WashTech{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Back Button -->
+            <a href="{{ url_for('operator.dashboard') }}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+            </a>
+
+            <!-- Reserva Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i>Reserva #{{ reservation.id }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información del Cliente -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Cliente</h6>
+                            <div>
+                                <strong class="fs-5">{{ reservation.user.name }}</strong>
+                                <div class="text-muted small mt-1">
+                                    <div><i class="fas fa-envelope me-1"></i>{{ reservation.user.email }}</div>
+                                    <div><i class="fas fa-phone me-1"></i>{{ reservation.user.phone }}</div>
+                                    <div><i class="fas fa-map-marker-alt me-1"></i>{{ reservation.user.address }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Estado</h6>
+                            <div>
+                                {% if reservation.status == 'pendiente' %}
+                                    <span class="badge bg-warning text-dark fs-6">{{ reservation.status|upper }}</span>
+                                {% elif reservation.status == 'confirmada' %}
+                                    <span class="badge bg-info fs-6">{{ reservation.status|upper }}</span>
+                                {% elif reservation.status == 'entregado' %}
+                                    <span class="badge bg-success fs-6">{{ reservation.status|upper }}</span>
+                                {% elif reservation.status == 'cancelada' %}
+                                    <span class="badge bg-danger fs-6">{{ reservation.status|upper }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Información de la Lavadora -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Lavadora</h6>
+                            <div>
+                                <strong class="fs-5">{{ reservation.washing_machine.model }}</strong>
+                                <div class="text-muted small mt-1">
+                                    <div><strong>Capacidad:</strong> {{ reservation.washing_machine.capacity }}</div>
+                                    <div><strong>Estado:</strong> {{ reservation.washing_machine.operational_status }}</div>
+                                    {% if reservation.washing_machine.inventory %}
+                                    <div><strong>Ubicación:</strong> {{ reservation.washing_machine.inventory.location }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Imagen</h6>
+                            {% if reservation.washing_machine.image_url %}
+                                <img src="{{ reservation.washing_machine.image_url }}" alt="{{ reservation.washing_machine.model }}" class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                            {% else %}
+                                <div class="alert alert-light text-center py-3">
+                                    <i class="fas fa-image fa-2x text-muted"></i>
+                                    <p class="text-muted mb-0 small">Sin imagen</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Información de la Reserva -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Fecha</h6>
+                            <strong class="fs-5">{{ reservation.reservation_date.strftime('%d/%m/%Y') }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Hora Inicio</h6>
+                            <strong class="fs-5">{{ reservation.start_time.strftime('%H:%M') }}</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-2">Hora Fin</h6>
+                            <strong class="fs-5">{{ reservation.end_time.strftime('%H:%M') }}</strong>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Información de Pago -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="text-muted mb-2">Pago Total</h6>
+                            <strong class="fs-5 text-success">${{ "%.2f"|format(reservation.total_payment) }}</strong>
+                            {% if reservation.payments %}
+                            <div class="mt-2 small">
+                                <div class="text-muted">{{ reservation.payments|length }} pago(s) registrado(s)</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if reservation.washing_machine.description %}
+                    <hr>
+                    <div>
+                        <h6 class="text-muted mb-2">Descripción de la Lavadora</h6>
+                        <p class="mb-0">{{ reservation.washing_machine.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            {% if reservation.status == 'pendiente' %}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-success btn-lg w-100" data-bs-toggle="modal" data-bs-target="#deliverConfirm">
+                        <i class="fas fa-check-circle me-2"></i>Marcar como Entregado
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-danger btn-lg w-100" data-bs-toggle="modal" data-bs-target="#cancelConfirm">
+                        <i class="fas fa-ban me-2"></i>Cancelar Reserva
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal Confirmar Entrega -->
+<div class="modal fade" id="deliverConfirm" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Entrega</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Confirmas que has entregado la lavadora <strong>{{ reservation.washing_machine.model }}</strong> a <strong>{{ reservation.user.name }}</strong>?</p>
+                <div class="alert alert-info small" role="alert">
+                    <i class="fas fa-info-circle me-1"></i>Esta acción cambiará el estado de la reserva a "entregado" y no se puede deshacer
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('operator.deliver_reservation', id=reservation.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle me-1"></i>Confirmar Entrega
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cancelar Reserva -->
+<div class="modal fade" id="cancelConfirm" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancelar Reserva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Deseas cancelar la reserva <strong>#{{ reservation.id }}</strong>?</p>
+                <div class="alert alert-warning small" role="alert">
+                    <i class="fas fa-exclamation-triangle me-1"></i>Esta acción no se puede deshacer. El administrador podrá reasignar la reserva.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Volver</button>
+                <form method="POST" action="{{ url_for('operator.cancel_reservation', id=reservation.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-ban me-1"></i>Cancelar Reserva
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

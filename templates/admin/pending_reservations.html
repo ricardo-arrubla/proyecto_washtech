@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Pendientes - WashTech{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">MENÚ ADMIN</h6>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('dashboard.index') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                        <a href="{{ url_for('admin.list_washing_machines') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-washing-machine me-2"></i>Lavadoras
+                        </a>
+                        <a href="{{ url_for('reservation.index') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-calendar me-2"></i>Reservas
+                        </a>
+                        <a href="{{ url_for('admin.pending_reservations') }}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-hourglass-end me-2"></i>Pendientes
+                        </a>
+                        <a href="{{ url_for('admin.list_users') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-users me-2"></i>Clientes
+                        </a>
+                        <a href="{{ url_for('report.index') }}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-chart-bar me-2"></i>Reportes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Header -->
+            <div class="bg-white rounded shadow-sm p-4 mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-hourglass-end text-warning me-2"></i>
+                    Gestión de Reservas Pendientes
+                </h2>
+                <p class="text-muted mb-0">Asigna operadores para entregar las lavadoras en reserva</p>
+            </div>
+
+            <!-- Tabs -->
+            <!-- Lavadoras con reservas pendientes -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="fas fa-list-alt me-2 text-primary"></i>
+                        Lavadoras con Reservas Pendientes <span class="badge bg-warning ms-2">{{ pending_machines|length }}</span>
+                    </h5>
+                    {% if pending_machines %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for machine in pending_machines %}
+                                <div class="card p-2 shadow-sm" style="min-width: 220px;">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-2">
+                                            <img src="{{ machine.image_url or '/static/images/icono de lavadora.jpg' }}" alt="{{ machine.model }}" style="width:48px; height:48px; object-fit:cover; border-radius:6px;">
+                                        </div>
+                                        <div>
+                                            <strong>{{ machine.model }}</strong>
+                                            <div class="small text-muted">Reservas pendientes: {{ machine_counts.get(machine.id, 0) }}</div>
+                                            <div class="small text-muted">Estado: {{ machine.operational_status }}</div>
+                                        </div>
+                                        <div class="ms-auto">
+                                            <a href="{{ url_for('admin.view_washing_machine', id=machine.id) }}" class="btn btn-sm btn-outline-secondary">Ver</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-check me-2"></i>No hay lavadoras con reservas pendientes.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="unassigned-tab" data-bs-toggle="tab" data-bs-target="#unassigned" type="button" role="tab" aria-controls="unassigned" aria-selected="true">
+                        <i class="fas fa-inbox me-2"></i>Sin Asignar <span class="badge bg-danger ms-2">{{ unassigned_pending|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="assigned-tab" data-bs-toggle="tab" data-bs-target="#assigned" type="button" role="tab" aria-controls="assigned" aria-selected="false">
+                        <i class="fas fa-tasks me-2"></i>Asignadas <span class="badge bg-info ms-2">{{ assigned_pending|length }}</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Tab Pendientes Sin Asignar -->
+                <div class="tab-pane fade show active" id="unassigned" role="tabpanel" aria-labelledby="unassigned-tab">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-inbox me-2 text-danger"></i>Reservas Sin Operador Asignado
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if unassigned_pending %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID Reserva</th>
+                                                <th>Cliente</th>
+                                                <th>Lavadora</th>
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                                <th>Asignar Operador</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for reservation in unassigned_pending %}
+                                            <tr>
+                                                <td><strong>#{{ reservation.id }}</strong></td>
+                                                <td>
+                                                    <div>
+                                                        <strong>{{ reservation.user.name }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ reservation.user.email }}</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ reservation.washing_machine.model }}</span>
+                                                </td>
+                                                <td>{{ reservation.reservation_date.strftime('%d/%m/%Y') }}</td>
+                                                <td>{{ reservation.start_time.strftime('%H:%M') }} - {{ reservation.end_time.strftime('%H:%M') }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#assignModal{{ reservation.id }}">
+                                                            <i class="fas fa-plus me-1"></i>Asignar
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Modal Asignar Operador -->
+                                                    <div class="modal fade" id="assignModal{{ reservation.id }}" tabindex="-1">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Asignar Operador</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>Selecciona un operador para asignar la reserva <strong>#{{ reservation.id }}</strong> ({{ reservation.washing_machine.model }})</p>
+                                                                    
+                                                                    {% if operators %}
+                                                                        <form method="POST" action="{{ url_for('admin.assign_operator', id=reservation.id) }}">
+                                                                            <div class="mb-3">
+                                                                                <label for="operator_{{ reservation.id }}" class="form-label">Operador</label>
+                                                                                <select class="form-select" id="operator_{{ reservation.id }}" name="operator_id" required>
+                                                                                    <option value="">-- Selecciona operador --</option>
+                                                                                    {% for operator in operators %}
+                                                                                    <option value="{{ operator.id }}">{{ operator.name }} ({{ operator.email }})</option>
+                                                                                    {% endfor %}
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                                                <button type="submit" class="btn btn-primary">
+                                                                                    <i class="fas fa-check me-1"></i>Asignar
+                                                                                </button>
+                                                                            </div>
+                                                                        </form>
+                                                                    {% else %}
+                                                                        <div class="alert alert-warning" role="alert">
+                                                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                                                            No hay operadores disponibles. Crea operadores en Gestión de Usuarios.
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                                                        </div>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success text-center py-4" role="alert">
+                                    <i class="fas fa-check-circle fa-3x mb-3 d-block text-success"></i>
+                                    <strong>¡Excelente!</strong>
+                                    <p class="mb-0 text-muted">Todas las reservas pendientes han sido asignadas</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Pendientes Asignadas -->
+                <div class="tab-pane fade" id="assigned" role="tabpanel" aria-labelledby="assigned-tab">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tasks me-2 text-info"></i>Reservas con Operador Asignado
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if assigned_pending %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>ID Reserva</th>
+                                                <th>Cliente</th>
+                                                <th>Lavadora</th>
+                                                <th>Operador</th>
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for reservation in assigned_pending %}
+                                            <tr>
+                                                <td><strong>#{{ reservation.id }}</strong></td>
+                                                <td>
+                                                    <div>
+                                                        <strong>{{ reservation.user.name }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ reservation.user.email }}</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ reservation.washing_machine.model }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success">{{ reservation.assigned_operator.name }}</span>
+                                                </td>
+                                                <td>{{ reservation.reservation_date.strftime('%d/%m/%Y') }}</td>
+                                                <td>{{ reservation.start_time.strftime('%H:%M') }} - {{ reservation.end_time.strftime('%H:%M') }}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#unassignModal{{ reservation.id }}" title="Desasignar">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Modal Desasignar -->
+                                                    <div class="modal fade" id="unassignModal{{ reservation.id }}" tabindex="-1">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Desasignar Operador</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>¿Desasignar la reserva <strong>#{{ reservation.id }}</strong> del operador <strong>{{ reservation.assigned_operator.name }}</strong>?</p>
+                                                                    <div class="alert alert-warning small" role="alert">
+                                                                        <i class="fas fa-info-circle me-1"></i> La reserva volverá a estar disponible para reasignar
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                                    <form method="POST" action="{{ url_for('admin.unassign_operator', id=reservation.id) }}" style="display: inline;">
+                                                                        <button type="submit" class="btn btn-warning">
+                                                                            <i class="fas fa-times me-1"></i>Desasignar
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info text-center py-4" role="alert">
+                                    <i class="fas fa-inbox fa-3x mb-3 d-block text-muted"></i>
+                                    <strong>No hay reservas asignadas</strong>
+                                    <p class="mb-0 text-muted">Asigna operadores a las reservas pendientes desde la pestaña anterior</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

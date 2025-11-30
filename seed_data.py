@@ -15,9 +15,9 @@ def seed_database():
     with app.app_context():
         print("🌱 Iniciando poblado de base de datos...")
         
-        # Limpiar datos existentes (opcional)
-        # db.drop_all()
-        # db.create_all()
+        # Crear tablas si no existen
+        db.create_all()
+        print("✅ Tablas de base de datos creadas o verificadas")
         
         # Crear usuarios
         print("\n👤 Creando usuarios...")
@@ -47,6 +47,19 @@ def seed_database():
             admin.set_password('admin123')
             db.session.add(admin)
             print("✅ Admin (Camilo) creado")
+        
+        # Operadores
+        if not User.query.filter_by(email='operador@washtech.com').first():
+            operador = User(
+                name='Operador Principal',
+                email='operador@washtech.com',
+                phone='3008765432',
+                address='Calle 12 #10-5, Tuluá',
+                role='operador'
+            )
+            operador.set_password('operador123')
+            db.session.add(operador)
+            print("✅ Operador (Operador Principal) creado")
         
         # Clientes
         clientes_data = [
@@ -78,7 +91,6 @@ def seed_database():
                 'model': 'Samsung WF-15K',
                 'capacity': '15 kg',
                 'status': 'operativa',
-                # imagen representativa de lavadora (frontal)
                 'image': '/static/images/lavadora samsung 7.5kg.webp',
                 'description': 'Lavadora de carga frontal con tecnología EcoBubble y tambor de diamante',
                 'location': 'Bodega A - Zona 1',
@@ -142,7 +154,7 @@ def seed_database():
                 'model': 'Samsung AddWash',
                 'capacity': '13 kg',
                 'status': 'mantenimiento',
-                'image': '/static/images/washer4.jpg',
+                'image': '/static/images/lavadora Direct motion 18 kg.webp',
                 'description': 'Lavadora con puerta adicional para agregar ropa durante el ciclo',
                 'location': 'Taller de Mantenimiento',
                 'date': date(2024, 5, 15)
@@ -151,7 +163,7 @@ def seed_database():
                 'model': 'LG Twin Wash',
                 'capacity': '22 kg',
                 'status': 'operativa',
-                'image': '/static/images/washer5.jpg',
+                'image': '/static/images/lavadora LG 22 kg.webp',
                 'description': 'Sistema de doble lavadora para mayor productividad',
                 'location': 'Bodega D - Zona 1',
                 'date': date(2024, 6, 1)
@@ -160,7 +172,7 @@ def seed_database():
                 'model': 'General Electric Turbo',
                 'capacity': '11 kg',
                 'status': 'operativa',
-                'image': '/static/images/washer7.jpg',
+                'image': '/static/images/lavadora analoga 22 kg.webp',
                 'description': 'Lavadora con sistema turbo de alta velocidad',
                 'location': 'Bodega D - Zona 2',
                 'date': date(2024, 6, 15)

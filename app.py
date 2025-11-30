@@ -5,6 +5,7 @@ import os
 from config import Config
 from database.connection import db
 from models.user import User
+from models.washing_machine import WashingMachine
 
 def create_app():
     # Configurar Flask para servir archivos estáticos desde `views/static`
@@ -35,6 +36,7 @@ def create_app():
     from controllers.dashboard_controller import dashboard_bp
     from controllers.reservation_controller import reservation_bp
     from controllers.admin_controller import admin_bp
+    from controllers.operator_controller import operator_bp
     from controllers.catalog_controller import catalog_bp
     from controllers.report_controller import report_bp
     
@@ -42,6 +44,7 @@ def create_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(reservation_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(operator_bp)
     app.register_blueprint(catalog_bp)
     app.register_blueprint(report_bp)
     
@@ -50,7 +53,13 @@ def create_app():
     def index():
         if current_user.is_authenticated:
             return redirect(url_for('dashboard.index'))
-        return render_template('index.html')
+        # Contar lavadoras activas y pasarlo a la plantilla
+        try:
+            washing_count = WashingMachine.query.filter_by(is_active=True).count()
+        except Exception:
+            # Si hay problema con la BD (por ejemplo en primera ejecución), usar 0
+            washing_count = 0
+        return render_template('index.html', washing_count=washing_count)
     
     return app
 

@@ -69,3 +69,48 @@ def logout():
     logout_user()
     flash('Sesión cerrada exitosamente', 'success')
     return redirect(url_for('index'))
+
+
+@auth_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    """Ver y editar el perfil del usuario actual"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
+        # Password change is handled via a separate flow
+        current_user.name = name or current_user.name
+        current_user.phone = phone or current_user.phone
+        current_user.address = address or current_user.address
+
+        db.session.commit()
+        flash('Perfil actualizado correctamente', 'success')
+        return redirect(url_for('auth.profile'))
+
+    return render_template('auth/profile.html', user=current_user)
+
+
+@auth_bp.route('/profile/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """Formulario para cambiar la contraseña del usuario actual"""
+    if request.method == 'POST':
+        current_pwd = request.form.get('current_password')
+        new_pwd = request.form.get('new_password')
+        confirm_pwd = request.form.get('confirm_password')
+
+        if not current_user.check_password(current_pwd):
+            flash('La contraseña actual es incorrecta', 'error')
+            return redirect(url_for('auth.change_password'))
+
+        if not new_pwd or new_pwd != confirm_pwd:
+            flash('La nueva contraseña y la confirmación no coinciden', 'error')
+            return redirect(url_for('auth.change_password'))
+
+        current_user.set_password(new_pwd)
+        db.session.commit()
+        flash('Contraseña actualizada correctamente', 'success')
+        return redirect(url_for('auth.profile'))
+
+    return render_template('auth/change_password.html')

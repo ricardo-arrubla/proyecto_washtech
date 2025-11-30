@@ -9,12 +9,19 @@ from models.reservation import Reservation
 
 catalog_bp = Blueprint('catalog', __name__, url_prefix='/catalogo')
 
+def extract_capacity_number(capacity_str):
+    """Extrae el número de kg de una cadena de capacidad (ej: '15 kg' -> 15)"""
+    try:
+        return float(capacity_str.split()[0])
+    except (ValueError, IndexError):
+        return None
+
 @catalog_bp.route('/')
 def index():
     """Catálogo público de lavadoras"""
     # Obtener parámetros de búsqueda
     search = request.args.get('search', '')
-    capacity = request.args.get('capacity', '')
+    capacity_range = request.args.get('capacity', '')  # Rango: 'hasta_10', '10_15', '15_20', 'mas_20'
     status = request.args.get('status', '')
     
     # Query base
@@ -29,18 +36,34 @@ def index():
             )
         )
     
-    if capacity:
-        query = query.filter(WashingMachine.capacity.ilike(f'%{capacity}%'))
-    
     if status:
         query = query.filter(WashingMachine.operational_status == status)
     
     machines = query.all()
     
+    # Aplicar filtro de rango de capacidad en memoria (post-query)
+    if capacity_range:
+        filtered_machines = []
+        for machine in machines:
+            capacity_num = extract_capacity_number(machine.capacity)
+            if capacity_num is None:
+                continue
+            
+            if capacity_range == 'hasta_10' and capacity_num <= 10:
+                filtered_machines.append(machine)
+            elif capacity_range == '10_15' and 10 < capacity_num <= 15:
+                filtered_machines.append(machine)
+            elif capacity_range == '15_20' and 15 < capacity_num <= 20:
+                filtered_machines.append(machine)
+            elif capacity_range == 'mas_20' and capacity_num > 20:
+                filtered_machines.append(machine)
+        
+        machines = filtered_machines
+    
     return render_template('catalog/index.html', 
                          machines=machines,
                          search=search,
-                         capacity=capacity,
+                         capacity_range=capacity_range,
                          status=status)
 
 @catalog_bp.route('/lavadora/<int:id>')

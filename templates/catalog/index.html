@@ -31,10 +31,10 @@
                         </label>
                         <select class="form-select" id="capacity" name="capacity">
                             <option value="">Todas</option>
-                            <option value="7" {% if capacity == '7' %}selected{% endif %}>7 kg</option>
-                            <option value="10" {% if capacity == '10' %}selected{% endif %}>10 kg</option>
-                            <option value="15" {% if capacity == '15' %}selected{% endif %}>15 kg</option>
-                            <option value="20" {% if capacity == '20' %}selected{% endif %}>20 kg</option>
+                            <option value="hasta_10" {% if capacity_range == 'hasta_10' %}selected{% endif %}>Hasta 10 kg</option>
+                            <option value="10_15" {% if capacity_range == '10_15' %}selected{% endif %}>10 - 15 kg</option>
+                            <option value="15_20" {% if capacity_range == '15_20' %}selected{% endif %}>15 - 20 kg</option>
+                            <option value="mas_20" {% if capacity_range == 'mas_20' %}selected{% endif %}>Más de 20 kg</option>
                         </select>
                     </div>
                     <div class="col-md-3">

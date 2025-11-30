@@ -11,12 +11,14 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     phone = db.Column(db.String(20))
     address = db.Column(db.Text)
-    role = db.Column(db.String(20), default='cliente')  # cliente, admin, superadmin
+    role = db.Column(db.String(20), default='cliente')  # cliente, admin, superadmin, operador
     is_active = db.Column(db.Boolean, default=True)
     registration_date = db.Column(db.DateTime, default=db.func.now())
     
     # Relaciones
-    reservations = db.relationship('Reservation', backref='user', lazy=True)
+    reservations = db.relationship('Reservation', foreign_keys='Reservation.user_id', backref='user', lazy=True)
+    # Operador puede tener muchas reservas asignadas
+    assigned_reservations = db.relationship('Reservation', foreign_keys='Reservation.assigned_operator_id', backref='assigned_operator', lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

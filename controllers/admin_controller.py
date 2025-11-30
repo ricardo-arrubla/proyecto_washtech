@@ -10,6 +10,7 @@ from models.washing_machine import WashingMachine
 from models.inventory import Inventory
 from models.user import User
 from models.reservation import Reservation
+from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -174,8 +175,10 @@ def list_users():
 def view_user(id):
     """Ver detalle de un usuario: máquinas reservadas y historial de reservas"""
     user = User.query.get_or_404(id)
-    # Obtener reservas activas e inactivas (historial)
-    reservations = Reservation.query.filter_by(user_id=user.id).order_by(Reservation.created_at.desc()).all()
+    # Obtener reservas (incluye históricas). Usar joinedload para cargar lavadora relacionada.
+    reservations = Reservation.query.filter(Reservation.user_id == user.id).options(
+        joinedload(Reservation.washing_machine)
+    ).order_by(Reservation.created_at.desc()).all()
 
     # Conjunto de máquinas reservadas por el usuario (únicas)
     machines = []
@@ -199,7 +202,7 @@ def change_user_role(id):
     user = User.query.get_or_404(id)
     new_role = request.form.get('role')
     
-    if new_role in ['cliente', 'admin', 'superadmin']:
+    if new_role in ['cliente', 'admin', 'superadmin', 'operador']:
         user.role = new_role
         db.session.commit()
         flash(f'Rol de {user.name} actualizado a {new_role}', 'success')
@@ -218,3 +221,101 @@ def deactivate_user(id):
     db.session.commit()
     flash(f'Usuario {user.name} desactivado', 'success')
     return redirect(url_for('admin.list_users'))
+
+# ==================== GESTIÓN DE PENDIENTES ====================
+
+@admin_bp.route('/pendientes')
+@login_required
+@admin_required
+def pending_reservations():
+    """Ver todas las reservas pendientes sin asignar"""
+    from datetime import date
+    today = date.today()
+    
+    # Reservas pendientes sin operador asignado
+    unassigned_pending = Reservation.query.filter(
+        Reservation.status == 'pendiente',
+        Reservation.assigned_operator_id == None,
+        Reservation.is_active == True
+    ).order_by(Reservation.reservation_date.asc(), Reservation.start_time.asc()).all()
+    
+    # Reservas pendientes asignadas (para ver distribución)
+    assigned_pending = Reservation.query.filter(
+        Reservation.status == 'pendiente',
+        Reservation.assigned_operator_id != None,
+        Reservation.is_active == True
+    ).order_by(Reservation.reservation_date.asc(), Reservation.start_time.asc()).all()
+    
+    # Obtener operadores disponibles
+    operators = User.query.filter_by(role='operador', is_active=True).all()
+
+    # Todas las reservas pendientes (asignadas y sin asignar)
+    pending_all = unassigned_pending + assigned_pending
+
+    # Lista de lavadoras que tienen alguna reserva pendiente (únicas)
+    pending_machines = []
+    machine_counts = {}
+    seen = set()
+    for r in pending_all:
+        # Aseguramos que la lavadora esté cargada
+        wm = r.washing_machine
+        if not wm:
+            continue
+        # contar reservas por máquina
+        machine_counts[wm.id] = machine_counts.get(wm.id, 0) + 1
+        if wm.id not in seen:
+            pending_machines.append(wm)
+            seen.add(wm.id)
+
+    return render_template('admin/pending_reservations.html', 
+                         unassigned_pending=unassigned_pending,
+                         assigned_pending=assigned_pending,
+                         operators=operators,
+                         pending_machines=pending_machines,
+                         machine_counts=machine_counts)
+
+@admin_bp.route('/pendientes/<int:id>/asignar', methods=['POST'])
+@login_required
+@admin_required
+def assign_operator(id):
+    """Asignar operador a una reserva pendiente"""
+    reservation = Reservation.query.get_or_404(id)
+    operator_id = request.form.get('operator_id')
+    
+    # Verificar que la reserva esté pendiente
+    if reservation.status != 'pendiente':
+        flash('Solo puedes asignar operadores a reservas pendientes', 'error')
+        return redirect(url_for('admin.pending_reservations'))
+    
+    # Verificar que el operador existe y es válido
+    operator = User.query.get_or_404(int(operator_id))
+    if operator.role != 'operador' or not operator.is_active:
+        flash('Operador inválido', 'error')
+        return redirect(url_for('admin.pending_reservations'))
+    
+    # Asignar operador
+    reservation.assigned_operator_id = operator.id
+    db.session.commit()
+    
+    flash(f'Reserva #{reservation.id} asignada a {operator.name}', 'success')
+    return redirect(url_for('admin.pending_reservations'))
+
+@admin_bp.route('/pendientes/<int:id>/desasignar', methods=['POST'])
+@login_required
+@admin_required
+def unassign_operator(id):
+    """Desasignar operador de una reserva pendiente"""
+    reservation = Reservation.query.get_or_404(id)
+    
+    # Verificar que la reserva esté pendiente
+    if reservation.status != 'pendiente':
+        flash('Solo puedes desasignar operadores de reservas pendientes', 'error')
+        return redirect(url_for('admin.pending_reservations'))
+    
+    # Desasignar operador
+    operator_name = reservation.assigned_operator.name if reservation.assigned_operator else 'N/A'
+    reservation.assigned_operator_id = None
+    db.session.commit()
+    
+    flash(f'Reserva #{reservation.id} desasignada de {operator_name}', 'success')
+    return redirect(url_for('admin.pending_reservations'))

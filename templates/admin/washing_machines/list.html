@@ -133,7 +133,12 @@
                                         <td>
                                             {% if machine.image_url %}
                                                 <img src="{{ machine.image_url }}" alt="{{ machine.model }}" 
-                                                     class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                                     class="rounded" style="width: 50px; height: 50px; object-fit: cover;"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div class="bg-secondary bg-opacity-10 rounded d-none align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-washing-machine text-secondary"></i>
+                                                </div>
                                             {% else %}
                                                 <div class="bg-secondary bg-opacity-10 rounded d-flex align-items-center justify-content-center" 
                                                      style="width: 50px; height: 50px;">

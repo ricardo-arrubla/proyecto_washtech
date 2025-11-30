@@ -17,7 +17,38 @@ def index():
     user_role = current_user.role
 
     if user_role == 'cliente':
-        return render_template('dashboard/client.html', user=current_user)
+        # Estadísticas específicas para el cliente actual
+        # Reservas activas (pendiente o confirmada)
+        reservas_activas = Reservation.query.filter(
+            Reservation.user_id == current_user.id,
+            Reservation.is_active == True,
+            Reservation.status.in_(['pendiente', 'confirmada'])
+        ).count()
+
+        # Total de alquileres (historial)
+        total_alquileres = Reservation.query.filter_by(user_id=current_user.id).count()
+
+        # Próxima reserva (la más cercana a hoy)
+        today = date.today()
+        next_reservation = Reservation.query.filter(
+            Reservation.user_id == current_user.id,
+            Reservation.is_active == True,
+            Reservation.reservation_date >= today
+        ).order_by(Reservation.reservation_date.asc(), Reservation.start_time.asc()).first()
+
+        # Reservas recientes (últimas 5)
+        recent_reservations = Reservation.query.filter_by(user_id=current_user.id).order_by(Reservation.created_at.desc()).limit(5).all()
+
+        return render_template('dashBoard/client.html', user=current_user,
+                               reservas_activas=reservas_activas,
+                               total_alquileres=total_alquileres,
+                               next_reservation=next_reservation,
+                               recent_reservations=recent_reservations)
+
+    # Para operador mostrar dashboard específico
+    if user_role == 'operador':
+        from flask import redirect, url_for
+        return redirect(url_for('operator.dashboard'))
 
     # Para admin/superadmin calculamos estadísticas reales
     if user_role in ('admin', 'superadmin'):
@@ -35,7 +66,7 @@ def index():
         # Clientes activos
         clients_active = User.query.filter_by(role='cliente', is_active=True).count()
 
-        return render_template('dashboard/admin.html', user=current_user,
+        return render_template('dashBoard/admin.html', user=current_user,
                                total_machines=total_machines,
                                operatives_count=operatives_count,
                                maintenance_count=maintenance_count,
@@ -44,4 +75,4 @@ def index():
                                reservas_pendientes=reservas_pendientes,
                                clients_active=clients_active)
 
-    return render_template('dashboard/client.html', user=current_user)
+    return render_template('dashBoard/client.html', user=current_user)

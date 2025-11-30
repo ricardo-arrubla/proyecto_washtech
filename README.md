@@ -90,6 +90,7 @@ Credenciales de prueba (seed_data.py)
 
 - SuperAdmin: `super@washtech.com` / `super123`
 - Admin: `admin@washtech.com` / `admin123`
+- Operador: `operador@washtech.com` / `operador123`
 - Cliente: `maria@email.com` / `cliente123`
 
 Notas útiles

@@ -5,13 +5,13 @@
 Resumen rápido
 
 - **Desarrollo**: Proyecto Flask que usa SQLite por defecto
-- **Producción (Railway)**: PostgreSQL con variable de entorno `DATABASE_URL` (configurada automáticamente por Railway)
-- Incluye `Procfile` y `gunicorn` para despliegue en Railway
+- **Producción (Render)**: PostgreSQL con variable de entorno `DATABASE_URL` (configurada automáticamente por Render)
+- Incluye `Procfile` y `gunicorn` para despliegue en Render
 
 Requisitos
 
 - Python 3.10+ (probado con 3.11)
-- Para Railway: Cuenta en [railway.app](https://railway.app)
+- Para Render: Cuenta en [render.com](https://render.com)
 
 1. Crear y activar entorno virtual
 
@@ -36,23 +36,31 @@ pip install -r requerimientos.txt
 
 3. Crear las tablas de la base de datos
 
-Opción A (crear tablas manualmente):
+La aplicación crea automáticamente las tablas cuando se ejecuta por primera vez.
+
+**Con `run.py` (recomendado - única forma de ejecutar):**
 
 ```bash
-python - <<'PY'
+python run.py
+```
+
+Este comando:
+
+- ✅ Crea las tablas automáticamente si no existen
+- ✅ Inicia el servidor de desarrollo
+- ✅ Es el único punto de entrada necesario
+
+**Si prefieres crear tablas manualmente sin ejecutar el servidor:**
+
+```bash
+python << 'EOF'
 from app import create_app
 from database.connection import db
 app = create_app()
 with app.app_context():
     db.create_all()
-    print('Tablas creadas')
-PY
-```
-
-Opción B (el script `app.py` también crea tablas si se ejecuta directamente):
-
-```bash
-python app.py
+    print('✅ Tablas creadas')
+EOF
 ```
 
 4. Poblar datos de prueba (seed)
@@ -69,7 +77,13 @@ El script imprimirá credenciales de prueba (SuperAdmin, Admin, Cliente).
 python run.py
 ```
 
-Abre `http://127.0.0.1:5000` en el navegador.
+La aplicación estará disponible en `http://127.0.0.1:5000`
+
+### Arquitectura de la aplicación
+
+- **`app.py`**: Define la factory `create_app()` (importado por `run.py`)
+- **`run.py`**: Punto de entrada único (ejecuta la app y crea tablas automáticamente)
+- **`seed_data.py`**: Script para poblar datos de prueba
 
 6. Verificar qué base de datos está usando la app
 
@@ -96,82 +110,127 @@ Credenciales de prueba (seed_data.py)
 - Operador: `operador@washtech.com` / `operador123`
 - Cliente: `maria@email.com` / `cliente123`
 
+## 📁 Estructura de ejecución
+
+### Antes (confuso)
+
+```
+app.py       → Punto de entrada + configuración + crea tablas
+run.py       → Punto de entrada sin crear tablas
+```
+
+### Ahora (limpio)
+
+```
+app.py       → Solo define create_app() (factory pattern)
+run.py       → Punto de entrada ÚNICO (crea tablas + inicia servidor)
+seed_data.py → Script para poblar datos de prueba
+```
+
+**Flujo de ejecución:**
+
+```
+python run.py
+    ↓
+Importa create_app() de app.py
+    ↓
+Crea tablas automáticamente (db.create_all())
+    ↓
+Inicia servidor en http://127.0.0.1:5000
+```
+
 ---
 
-## 🚀 Despliegue en Railway
+## 🚀 Despliegue en Render
 
 ### Requisitos previos
 
-1. Cuenta en [railway.app](https://railway.app)
+1. Cuenta en [render.com](https://render.com)
 2. Repositorio en GitHub con los cambios
-3. Variables de entorno configuradas (Railway las crea automáticamente)
+3. Variables de entorno configuradas (Render las crea automáticamente)
 
 ### Pasos para desplegar
 
-#### 1. Conectar repositorio a Railway
+#### 1. Conectar repositorio a Render
 
 ```
-1. Inicia sesión en Railway.app
-2. Haz clic en "New Project"
-3. Selecciona "Deploy from GitHub repo"
-4. Autoriza el acceso a tu repositorio de GitHub
+1. Inicia sesión en Render.com
+2. Haz clic en "New +"
+3. Selecciona "Web Service"
+4. Conecta tu repositorio de GitHub
 5. Selecciona el repositorio "proyecto_washtech"
+6. Asegúrate de seleccionar la rama correcta (main o ricardo)
 ```
 
-#### 2. Railway configurará automáticamente:
+#### 2. Configurar el Web Service
 
-- **`Procfile`**: Indicará cómo ejecutar la aplicación con gunicorn
-- **Variables de entorno**: Railway detectará `DATABASE_URL` automáticamente
+En el formulario de Render:
 
-#### 3. Agregar base de datos PostgreSQL
+- **Name**: washtech (o el nombre que prefieras)
+- **Environment**: Python 3
+- **Build Command**: `pip install -r requerimientos.txt`
+- **Start Command**: `gunicorn app:app`
+- **Region**: Selecciona la más cercana a ti
+
+#### 3. Render detectará automáticamente:
+
+- **`Procfile`**: Leerá `web: gunicorn app:app`
+- **`requerimientos.txt`**: Instalará todas las dependencias
+
+#### 4. Agregar base de datos PostgreSQL
+
+En el dashboard de Render:
 
 ```
-1. En tu proyecto de Railway: "+ Add Service"
-2. Selecciona "Database"
-3. Elige "PostgreSQL"
-4. Railway creará automáticamente la variable DATABASE_URL
+1. En tu Web Service: "Connected Services" → "Create New"
+2. Selecciona "PostgreSQL"
+3. Configura:
+   - Name: washtech-db (o el nombre que prefieras)
+   - PostgreSQL Version: 15 (o la versión disponible)
+4. Render creará automáticamente la variable DATABASE_URL
 ```
 
-#### 4. Configurar variables de entorno (opcional pero recomendado)
+#### 5. Vincular variables de entorno
 
-En Railway Dashboard → Variables:
+En tu Web Service → Environment:
 
 ```
-SECRET_KEY=tu_clave_secreta_segura
+DATABASE_URL=valor_creado_automáticamente_por_render
+SECRET_KEY=tu_clave_secreta_segura_aqui
 ```
 
-#### 5. Railway desplegará automáticamente
+#### 6. Render desplegará automáticamente
 
 - Los cambios se desplegarán cuando hagas push a tu rama principal
-- Las tablas se crearán automáticamente (si lo configuras en el startup)
+- Puedes ver el progreso en Render Dashboard → Deployments
 
-### Crear tablas en Railway (primera vez)
+### Crear tablas en Render (primera vez)
 
-**Opción A: Ejecutar comando en Railway SSH**
+**Opción A: Usar Render Shell**
 
 ```bash
-# En Railway Dashboard → Deployments → Shell
-python - <<'PY'
+# En Render Dashboard → Web Service → Shell
+python << 'EOF'
 from app import create_app
 from database.connection import db
 app = create_app()
 with app.app_context():
     db.create_all()
     print('✅ Tablas creadas en PostgreSQL')
-PY
+EOF
 ```
 
 **Opción B: Poblar datos de prueba**
 
 ```bash
-# En Railway SSH
+# En Render Shell
 python seed_data.py
 ```
 
 ### Monitoreo y logs
 
 ```
-Railway Dashboard → Deployments → Logs
+Render Dashboard → Web Service → Logs
 - Ver logs en tiempo real
 - Detectar errores de conexión a BD
 - Verificar que gunicorn esté corriendo
@@ -179,12 +238,19 @@ Railway Dashboard → Deployments → Logs
 
 ### Problemas comunes
 
-| Problema                     | Solución                                                         |
-| ---------------------------- | ---------------------------------------------------------------- |
-| `DATABASE_URL` no encontrada | Railway la crea cuando agregas PostgreSQL. Verifica en Variables |
-| Tablas no existen            | Ejecuta `db.create_all()` en Railway SSH (ver arriba)            |
-| Puerto en uso                | Railway asigna automáticamente el puerto en variable `PORT`      |
-| Errores de conexión          | Verifica que PostgreSQL esté activo en el dashboard de Railway   |
+| Problema                     | Solución                                                              |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `DATABASE_URL` no encontrada | Render la crea cuando agregas PostgreSQL. Verifica en Variables       |
+| Build failure                | Ejecuta `pip install -r requerimientos.txt` localmente para verificar |
+| Tablas no existen            | Ejecuta `db.create_all()` en Render Shell (ver arriba)                |
+| Errores de conexión BD       | Verifica que PostgreSQL esté activo en Render Dashboard               |
+| Port binding error           | Render asigna el puerto automáticamente via la variable `PORT`        |
+
+### URLs útiles
+
+- Dashboard Render: https://dashboard.render.com
+- Documentación: https://render.com/docs
+- PostgreSQL en Render: https://render.com/docs/databases
 
 ---
 
@@ -202,12 +268,12 @@ Railway Dashboard → Deployments → Logs
 
 - Configuración en `config.py`: Prioriza `DATABASE_URL` del entorno
 - Fallback local: `postgresql://postgres:pupiales8@localhost:5432/washtech_local`
-- En Railway: `DATABASE_URL` se crea automáticamente
+- En Render: `DATABASE_URL` se crea automáticamente
 - Requiere: `psycopg2-binary` (ya incluido en `requerimientos.txt`)
 
 ### Archivos importantes para despliegue
 
-- `Procfile`: Indica a Railway cómo ejecutar la app con gunicorn
+- `Procfile`: Indica a Render cómo ejecutar la app con gunicorn
 - `requerimientos.txt`: Incluye gunicorn y todas las dependencias
 - `config.py`: Maneja la configuración de BD según el entorno
 - `seed_data.py`: Para crear datos de prueba en la BD

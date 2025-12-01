@@ -7,7 +7,9 @@ from database.connection import db
 from models.user import User
 from models.washing_machine import WashingMachine
 
+
 def create_app():
+    """Factory function para crear la aplicación Flask"""
     # Configurar Flask para servir archivos estáticos desde `views/static`
     # (las plantillas usan rutas como `/static/images/...` pero los archivos
     # están en `views/static/images/` en este proyecto)
@@ -63,8 +65,24 @@ def create_app():
     
     return app
 
+
+# Crear instancia global de la aplicación
+# Esta es la que Gunicorn importará cuando ejecute: gunicorn app:app
+app = create_app()
+
+# Crear tablas automáticamente cuando se importa el módulo (Gunicorn lo hará)
+with app.app_context():
+    db.create_all()
+
+
 if __name__ == '__main__':
-    app = create_app()
+    # Punto de entrada para desarrollo local (python run.py)
     with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+        print('✅ Tablas de base de datos verificadas/creadas')
+    
+    # Ejecutar servidor de desarrollo
+    # - debug=True: recarga automática al cambiar código
+    # - host='0.0.0.0': accesible desde cualquier interfaz de red
+    # - port=5000: puerto por defecto de Flask
+    print('🚀 Iniciando WashTech en http://127.0.0.1:5000')
+    app.run(debug=True, host='0.0.0.0', port=5000)
